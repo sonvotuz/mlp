@@ -130,6 +130,7 @@ def train_multilayer_perceptron(
     # start training
     for _ in range(epochs):
         sum_squared_errors = 0
+        print("Input\t\tDesired output\t\tActual output\t\tError")
         for pair in paired_data:
             inputs = pair[0]
             target = pair[1]
@@ -138,7 +139,6 @@ def train_multilayer_perceptron(
                 inputs, hidden_weights, hidden_bias, output_weights, output_bias
             )
 
-            print("Input\t\tDesired output\t\tActual output\t\tError")
             for desired, actual in zip(target, output_layer_output):
                 err = desired - actual
                 print(f"{inputs}\t\t\t{desired}\t\t{actual}\t{err}")
@@ -165,6 +165,7 @@ def main():
     train_data = [[0, 0], [0, 1], [1, 0], [1, 1]]
     targets = list()
 
+    # ask user for a problem to train
     print("==============Multilayer Perceptron==============")
     while True:
         print("There are some problems you can choose to train.")
@@ -190,9 +191,9 @@ def main():
 
     # hyperparameters
     input_layer = 2
-    hidden_layer = 4
+    hidden_layer = 10
     output_layer = 1
-    epochs = 10000
+    epochs = 12000
     learning_rate = 0.1
 
     start = time.time()
@@ -211,20 +212,42 @@ def main():
     end = time.time()
     duration = end - start
     print(
-        f"Time to train the multilayer perceptron with {input_layer} input"
+        f"Time to train the multilayer perceptron with {input_layer} input "
         + f"layers, {hidden_layer} hidden layers, and {output_layer} output "
         + f"layer(s) in {epochs} epochs: {duration:.5f} seconds"
     )
 
-    print("\n===============================:")
-    print("Test the multilayer perceptron!")
-    first = int(input("Enter value for first input(0 or 1): "))
-    second = int(input("Enter value for second input(0 or 1): "))
+    # check the accuracy
+    target_err = 0.05
+    count = 0
+    accurate = 0
+    for i, test_input in enumerate(train_data):
+        _, output = forward_propagation(
+            test_input, hidden_weights, hidden_bias, output_weights, output_bias
+        )
+        for j in range(len(output)):
+            count += 1
+            if abs(output[j] - targets[i][j]) <= target_err:
+                accurate += 1
 
-    _, output = forward_propagation(
-        [first, second], hidden_weights, hidden_bias, output_weights, output_bias
-    )
-    print(f"Input: [{first}, {second}], Output: {output}")
+    accurate_rate = accurate / count * 100
+    print(f"Accuracy rate with target error {target_err}: {accurate_rate}%")
+
+    print("\n===============================")
+    while True:
+        print("Test the multilayer perceptron!")
+        first = int(input("Enter value for first input(0 or 1): "))
+        second = int(input("Enter value for second input(0 or 1): "))
+
+        _, output = forward_propagation(
+            [first, second], hidden_weights, hidden_bias, output_weights, output_bias
+        )
+        print(f"Input: [{first}, {second}], Output: {output}")
+        quitt = input("Quit testing?(y) ")
+        if quitt == "y" or quitt == "Y":
+            break
+
+    print()
 
 
 main()
